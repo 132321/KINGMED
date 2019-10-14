@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>杭州金域仪器联机结果转换平台</title>
+	<link href="css/zerogrid.css" rel="stylesheet" media="all" type="text/css">
+	<link href="css/style.css" rel="stylesheet" media="all" type="text/css">
+	<link href="css/menu.css" rel="stylesheet" media="all" type="text/css">
+	<!-- Animate.css -->
+	<link href="css/animate.css" rel="stylesheet" media="all" type="text/css">
+	<style type="text/css">
+		.bg-overlay {
+			display: flex;
+			align-items: center;
+			justify-content: space-around;
+		}
+
+		body {
+			background: linear-gradient(135deg, #2C3E50, #84AF9B);
+		}
+
+		h1 {
+			color: #fff;
+		}
+
+		.entry-des {
+			width: 400px;
+			height: 220px;
+			box-sizing: border-box;
+			border-radius: 5px;
+		}
+
+		img {
+			border: 0;
+		}
+
+		.cf:before,
+		.cf:after {
+			display: table;
+			content: "";
+		}
+
+		.cf:after {
+			clear: both;
+		}
+
+		.cf {
+			*zoom: 1;
+		}
+
+		canvas {
+			position: fixed;
+			top: 0px;
+			z-index: -1;
+		}
+	</style>
+</head>
+
+<body>
+	<canvas width="100%" height="100%" id="canvas"></canvas>
+	<div>
+		<section class="content-box box-5">
+			<div class="zerogrid">
+				<div class="wrap-box">
+					<!--Start Box-->
+					<div class="header wow fadeInUp" data-wow-delay=".1s" data-wow-duration="1s">
+						<h1 style="font-size: 50px;">仪器联机结果转换平台</h1>
+					</div>
+					<div class="content wow fadeInRight" data-wow-delay=".1s" data-wow-duration="1s">
+						<div class="row">
+							<div class="sm-1-2">
+								<div class="wrap-col">
+									<div class="box-entry">
+										<div class="box-entry-inner">
+											<div class="entry-details">
+												<div class="entry-des">
+													<h3><a href="allergen_conversion.html">过敏原结果转换</a></h3>
+													<p>将过敏原项目原始结果按照"国际特异性IgE浓度（IU/ml）"标准,转换成对应级别</p>
+													<a class="button button-skin" href="allergen_conversion.html">进
+														入</a>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="sm-1-2">
+								<div class="wrap-col">
+									<div class="box-entry">
+										<div class="box-entry-inner">
+											<div class="entry-details">
+												<div class="entry-des">
+													<h3><a href="hepatitis_b_conversion.html">乙肝表面抗体结果转换</a></h3>
+													<p>将乙肝表面抗体项目定量值转为定性值</p><br>
+													<a class="button button-skin" href="hepatitis_b_conversion.html">进
+														入</a>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<script>
+		var canvas = document.getElementById('canvas'),
+			ctx = canvas.getContext('2d')
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+
+		ctx.lineWidth = .3;
+		ctx.strokeStyle = (new Color(150)).style;
+		var mousePosition = {
+			x: 30 * canvas.width / 100,
+			y: 30 * canvas.height / 100
+		};
+		var dots = {
+			nb: 750,
+			distance: 50,
+			d_radius: 100,
+			array: []
+		};
+		function colorValue(min) {
+			return Math.floor(Math.random() * 255 + min);
+		}
+		function createColorStyle(r, g, b) {
+			return 'rgba(' + r + ',' + g + ',' + b + ', 0.8)';
+		}
+		function mixComponents(comp1, weight1, comp2, weight2) {
+			return (comp1 * weight1 + comp2 * weight2) / (weight1 + weight2);
+		}
+		function averageColorStyles(dot1, dot2) {
+			var color1 = dot1.color,
+				color2 = dot2.color;
+
+			var r = mixComponents(color1.r, dot1.radius, color2.r, dot2.radius),
+				g = mixComponents(color1.g, dot1.radius, color2.g, dot2.radius),
+				b = mixComponents(color1.b, dot1.radius, color2.b, dot2.radius);
+			return createColorStyle(Math.floor(r), Math.floor(g), Math.floor(b));
+		}
+
+		function Color(min) {
+			min = min || 0;
+			this.r = colorValue(min);
+			this.g = colorValue(min);
+			this.b = colorValue(min);
+			this.style = createColorStyle(this.r, this.g, this.b);
+		}
+
+		function Dot() {
+			this.x = Math.random() * canvas.width;
+			this.y = Math.random() * canvas.height;
+
+			this.vx = -.5 + Math.random();
+			this.vy = -.5 + Math.random();
+
+			this.radius = Math.random() * 2;
+
+			this.color = new Color();
+		}
+
+		Dot.prototype = {
+			draw: function () {
+				ctx.beginPath();
+				ctx.fillStyle = this.color.style;
+				ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+				ctx.fill();
+			}
+		};
+
+		function createDots() {
+			for (i = 0; i < dots.nb; i++) {
+				dots.array.push(new Dot());
+			}
+		}
+
+		function moveDots() {
+			for (i = 0; i < dots.nb; i++) {
+
+				var dot = dots.array[i];
+
+				if (dot.y < 0 || dot.y > canvas.height) {
+					dot.vx = dot.vx;
+					dot.vy = - dot.vy;
+				}
+				else if (dot.x < 0 || dot.x > canvas.width) {
+					dot.vx = - dot.vx;
+					dot.vy = dot.vy;
+				}
+				dot.x += dot.vx;
+				dot.y += dot.vy;
+			}
+		}
+
+		function connectDots() {
+			for (i = 0; i < dots.nb; i++) {
+				for (j = i; j < dots.nb; j++) {
+					i_dot = dots.array[i];
+					j_dot = dots.array[j];
+
+					if ((i_dot.x - j_dot.x) < dots.distance && (i_dot.y - j_dot.y) < dots.distance && (i_dot.x - j_dot.x) > - dots.distance && (i_dot.y - j_dot.y) > - dots.distance) {
+						if ((i_dot.x - mousePosition.x) < dots.d_radius && (i_dot.y - mousePosition.y) < dots.d_radius && (i_dot.x - mousePosition.x) > - dots.d_radius && (i_dot.y - mousePosition.y) > - dots.d_radius) {
+							ctx.beginPath();
+							ctx.strokeStyle = averageColorStyles(i_dot, j_dot);
+							ctx.moveTo(i_dot.x, i_dot.y);
+							ctx.lineTo(j_dot.x, j_dot.y);
+							ctx.stroke();
+							ctx.closePath();
+						}
+					}
+				}
+			}
+		}
+
+		function drawDots() {
+			for (i = 0; i < dots.nb; i++) {
+				var dot = dots.array[i];
+				dot.draw();
+			}
+		}
+
+		function animateDots() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			moveDots();
+			connectDots();
+			drawDots();
+			requestAnimationFrame(animateDots);
+		}
+		document.getElementById('canvas').addEventListener('mousemove', function (e) {
+			mousePosition.x = e.pageX;
+			mousePosition.y = e.pageY;
+		})
+
+		document.getElementById('canvas').addEventListener('mouseleave', function (e) {
+			mousePosition.x = canvas.width / 2;
+			mousePosition.y = canvas.height / 2;
+		})
+
+		createDots();
+		requestAnimationFrame(animateDots);
+
+	</script>
+</body>
+
+</html>
